@@ -20,9 +20,13 @@ def main():
     data['total_cases'] = np.where(data['total_cases'].isnull(), data['total_cases'], 0)
     data['new_cases'] = np.where(data['new_cases'].isnull(), data['new_cases'], 0)
 
+    #How to remove rows from the dataset.
+    data = data.drop(data[data['location'] == "Africa"].index)
+    data = data.drop(data[data['location'] == "Europe"].index)
 
 
     print(data.continent.unique())
+    print(data.location.unique())
 
 main()
 
