@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+# https://stackoverflow.com/questions/34007308/linear-regression-analysis-with-string-categorical-features-variables
+
+#date data isn't good for the standard linear regression package
+import datetime as dt
+
+
 def main():
 
 
@@ -21,12 +27,17 @@ def main():
     data['new_cases'] = np.where(data['new_cases'].isnull(), data['new_cases'], 0)
 
     #How to remove rows from the dataset.
+    '''
     data = data.drop(data[data['location'] == "Africa"].index)
     data = data.drop(data[data['location'] == "Europe"].index)
+    '''
+    data = data.drop(data[data['continent'].isnull()].index)
 
+    #print(data.continent.unique())
+    #print(data.location.unique())
 
-    print(data.continent.unique())
-    print(data.location.unique())
+    nan_columns = data.columns[data.isnull().any()]
+    print(nan_columns)
 
 main()
 
