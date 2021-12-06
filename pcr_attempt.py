@@ -17,17 +17,17 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 
 #https://scikit-learn.org/stable/auto_examples/cross_decomposition/plot_pcr_vs_pls.html
-def pcr_regression(X, y):
+def pls_regression(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
-    for i in range(1, 40, 2):
+    for i in range(1, 40, 1):
         pls = PLSRegression(n_components=i)
         pls.fit(X_train, y_train)
         print(f"I = {i}")
         print(pls.score(X_test, y_test))
 
 
-def pcr_cross_val(X, y):
+def pls_cross_val(X, y):
     n = len(X)
 
     # 10-fold CV, with shuffle
@@ -86,7 +86,8 @@ def main():
     uk_data = uk_data.drop("new_cases_per_million", axis = 1)
     uk_data = uk_data.drop("new_cases_smoothed_per_million", axis = 1)
 
-    pcr_regression(uk_data, num_cases)
+
+    pls_regression(uk_data, num_cases)
     print(uk_data.columns)
 
 if __name__=="__main__":
