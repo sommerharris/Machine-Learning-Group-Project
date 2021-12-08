@@ -29,7 +29,7 @@ def pls_regression(X_train, X_test, y_train, y_test):
 
 
 def main():
-    shift_var = -31
+    shift_var = -1
     data = pd.read_csv('owid-covid-data.csv')
     global_data = data[data['iso_code'].notna()]
 
@@ -62,12 +62,16 @@ def main():
 
     canada_data = global_data.loc[global_data['iso_code'] == "CAN"]
     can_num_cases = canada_data[['new_cases']].copy()
-    canada_data = canada_data.drop("new_cases", axis=1)
+    canada_data["new_cases"] = canada_data["new_cases"].shift(shift_var)
+    canada_data = canada_data.fillna(0)
 
     global_data = global_data.drop(global_data[global_data['iso_code'] == "CAN"].index)
 
+    #num cases
     num_cases = global_data[['new_cases']].copy()
-    global_data = global_data.drop("new_cases", axis=1)
+    global_data["new_cases"] = global_data["new_cases"].shift(shift_var)
+    global_data = global_data.fillna(0)
+
 
     global_data = global_data.drop("iso_code", axis=1)
     global_data = global_data.drop("continent", axis=1)
