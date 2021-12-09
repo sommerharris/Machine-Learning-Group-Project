@@ -15,16 +15,27 @@ from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
 
 #https://scikit-learn.org/stable/auto_examples/cross_decomposition/plot_pcr_vs_pls.html
 def pls_regression(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
+    score = []
+
     for i in range(1, 40, 1):
         pls = PLSRegression(n_components=i)
         pls.fit(X_train, y_train)
         print(f"I = {i}")
-        print(pls.score(X_test, y_test))
+        score.append(pls.score(X_test, y_test))
+        print(score[i-1])
+
+    plt.plot(list(range(1, 40, 1)), score)
+    plt.xticks(list(range(0, 41, 2)))
+    plt.xlabel("Number of components")
+    plt.ylabel("Score (R^2)?")
+    plt.title("Score with varying number of components")
+    plt.show()
 
 
 def pls_cross_val(X, y):
@@ -42,6 +53,7 @@ def pls_cross_val(X, y):
         mse.append(-score)
     print(mse)
 
+
 def l2(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
@@ -52,6 +64,7 @@ def l2(X, y):
     l2_r2 = r2_score(y_pred=l2_predict, y_true=y_test)
     print("Ridge score regression")
     print(l2_r2)
+
 
 def pca(X,y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)

@@ -16,16 +16,27 @@ from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+
 
 def pls_regression(X_train, X_test, y_train, y_test):
+
+    MLS = []
 
     for i in range(1, 40, 3):
         pls = PLSRegression(n_components=i)
         pls.fit(X_train, y_train)
         print(f"I = {i}")
         y_pred = pls.predict(X_test)
+        MLS.append(mean_squared_error(y_true = y_test, y_pred = y_pred, squared=False))
+        print(f"MSE: {MLS[i//3]}")
 
-        print(f"MSE: {mean_squared_error(y_true = y_test, y_pred = y_pred, squared=False)}")
+    plt.plot(list(range(1, 40, 3)), MLS)
+    plt.xticks(list(range(0, 41, 3)))
+    plt.xlabel("Number of components")
+    plt.ylabel("MSE")
+    plt.title("MSE with varying number of components")
+    plt.show()
 
 
 def main():
@@ -83,7 +94,6 @@ def main():
     canada_data = canada_data.drop("location", axis=1)
 
     pls_regression(global_data, canada_data, num_cases, can_num_cases)
-
 
     print(global_data.columns)
 

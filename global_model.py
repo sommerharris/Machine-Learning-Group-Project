@@ -13,15 +13,26 @@ from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
 
 def pls_regression(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8)
+
+    score = []
 
     for i in range(1, 40, 3):
         pls = PLSRegression(n_components=i)
         pls.fit(X_train, y_train)
         print(f"I = {i}")
-        print(pls.score(X_test, y_test))
+        score.append(pls.score(X_test, y_test))
+        print(score[i//3])
+
+    plt.plot(list(range(1, 40, 3)), score)
+    plt.xticks(list(range(1, 41, 3)))
+    plt.xlabel("Number of components")
+    plt.ylabel("Score (R^2)?")
+    plt.title("Score with varying number of components")
+    plt.show()
 
 
 def main():
