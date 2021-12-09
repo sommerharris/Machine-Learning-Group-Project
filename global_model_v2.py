@@ -41,7 +41,7 @@ def pls_regression(X, y):
 def main():
     data = pd.read_csv('owid-covid-data.csv')
     shift_var = -31
-    global_data = data[data['iso_code'].notna()]
+    global_data = data[data['continent'].notna()]
 
     global_data = global_data.fillna(0)
 
