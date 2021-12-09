@@ -14,24 +14,36 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
-def pls_regression(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8)
 
+def pls_regression(X_train, X_test, y_train, y_test):
     score = []
+    MSE = []
 
     for i in range(1, 40, 3):
         pls = PLSRegression(n_components=i)
         pls.fit(X_train, y_train)
         print(f"I = {i}")
         score.append(pls.score(X_test, y_test))
-        print(score[i//3])
+        print(score[i // 3])
+
+        y_pred = pls.predict(X_test)
+        MSE.append(mean_squared_error(y_true=y_test, y_pred=y_pred, squared=False))
+        print(f"MSE: {MSE[i//3]}")
 
     plt.plot(list(range(1, 40, 3)), score)
     plt.xticks(list(range(1, 41, 3)))
     plt.xlabel("Number of components")
     plt.ylabel("Score (R^2)?")
     plt.title("Score with varying number of components")
+    plt.show()
+
+    plt.plot(list(range(1, 40, 3)), MSE)
+    plt.xticks(list(range(1, 41, 3)))
+    plt.xlabel("Number of components")
+    plt.ylabel("MSE")
+    plt.title("MSE with varying number of components")
     plt.show()
 
 
@@ -63,6 +75,10 @@ def main():
     global_data = global_data.drop("total_cases", axis=1)
     global_data = global_data.drop("total_cases_per_million", axis = 1)
 
+    scaler = MinMaxScaler()
+
+    global_data = scaler.fit_transform(global_data)
+    num_cases = scaler.fit_transform(num_cases)
 
     pls_regression(global_data, num_cases)
 
