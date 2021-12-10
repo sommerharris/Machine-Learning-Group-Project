@@ -14,6 +14,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 def pls_regression(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8)
@@ -74,9 +75,15 @@ def main():
     global_data = global_data.drop("total_cases", axis=1)
     global_data = global_data.drop("total_cases_per_million", axis = 1)
 
+    scaler = MinMaxScaler()
+
+    global_data = scaler.fit_transform(global_data)
+    num_cases = scaler.fit_transform(num_cases)
 
     pls_regression(global_data, num_cases)
 
-    print(global_data.columns)
+
+    #print(global_data.columns)
+
 if __name__=="__main__":
     main()
