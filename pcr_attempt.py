@@ -94,7 +94,6 @@ def pls_cross_val(X, y):
 
 def l2(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-
     l2_lin_model = Ridge(fit_intercept=0)
     l2_lin_model.fit(X_train, y_train)
     l2_predict = l2_lin_model.predict(X_test)
@@ -119,6 +118,7 @@ def pca(X,y):
 
 def main():
     data = pd.read_csv('owid-covid-data.csv')
+    shift_var = -31
 
     uk_data = data.drop(data[data['iso_code'] != "GBR"].index)
     uk_data = uk_data.fillna(0)
@@ -127,20 +127,18 @@ def main():
     uk_data = uk_data.drop("location", axis = 1)
 
     num_cases = uk_data[['new_cases']].copy()
-    uk_data = uk_data.drop("new_cases", axis = 1)
-    uk_data = uk_data.drop("tests_units", axis = 1)
+    uk_data["new_cases"] = uk_data["new_cases"].shift(shift_var)
 
     uk_data['date'] = pd.to_datetime(uk_data['date'])
     uk_data['date'] = uk_data['date'].map(dt.datetime.toordinal)
 
-    #Need to drop columns related to new cases.
-    uk_data = uk_data.drop("new_cases_smoothed", axis = 1)
-    uk_data = uk_data.drop("new_cases_per_million", axis = 1)
-    uk_data = uk_data.drop("new_cases_smoothed_per_million", axis = 1)
+    uk_data = uk_data.drop("tests_units", axis=1)
 
-    #min_max_scaler = MinMaxScaler().fit_transform(data)
-    #data = pd.DataFrame(min_max_scaler, columns=data.columns)
-
+#Need to drop columns related to new cases.
+    uk_data['new_cases_smoothed'] = uk_data['new_cases_smoothed'].shift(shift_var)
+    uk_data['new_cases_per_million'] = uk_data["new_cases_per_million"].shift(shift_var)
+    uk_data['new_cases_smoothed_per_million'] = uk_data["new_cases_smoothed_per_million"].shift(shift_var)
+    uk_data = uk_data.fillna(0)
 
     pls_regression(uk_data, num_cases)
     print(uk_data.columns)
