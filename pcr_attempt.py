@@ -20,8 +20,9 @@ from sklearn.preprocessing import MinMaxScaler
 
 #https://scikit-learn.org/stable/auto_examples/cross_decomposition/plot_pcr_vs_pls.html
 def pls_regression(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
     score = []
     MSE = []
     coefficients = []
@@ -45,6 +46,7 @@ def pls_regression(X, y):
         print(pls.coef_)
 
     plt.plot(list(range(1, 40, 1)), score)
+    plt.title("PLS regression")
     plt.xticks(list(range(0, 41, 2)))
     plt.xlabel("Number of components")
     plt.ylabel("Score (R^2)?")
@@ -105,20 +107,57 @@ def l2(X, y):
 
 def pca(X,y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    score = []
+    MSE = []
+    coefficients = []
 
     for i in range(1, 40, 1):
         pcr = make_pipeline(StandardScaler(), PCA(n_components=i), Ridge())
         pcr.fit(X_train, y_train)
         pca = pcr.named_steps["pca"]
-        pca_predict = pcr.predict(X_test)
+        y_pred = pcr.predict(X_test)
+        '''
         pca_r2 = r2_score(y_pred = pca_predict, y_true= y_test)
         print(f"PCA score. Components:{i}")
-        print(pca_r2)
+        '''
+        MSE.append(mean_squared_error(y_true=y_test, y_pred=y_pred, squared=False))
+        score.append(pcr.score(X_test, y_test))
+        coefficients.append([])
+
+        # for j in pcr.coef_:
+        #     coefficients[i-1].append(j[0])
+
+        print(f"MSE: {MSE[i // 3]}")
+        print(score[i-1])
+        # print(pcr.coef_)
+
+    plt.plot(list(range(1, 40, 1)), score)
+    plt.title("PCR regression")
+    plt.xticks(list(range(0, 41, 2)))
+    plt.xlabel("Number of components")
+    plt.ylabel("Score (R^2)?")
+    plt.title("Score with varying number of components")
+    plt.show()
+
+    plt.plot(list(range(1, 40, 1)), MSE)
+    plt.xticks(list(range(0, 41, 2)))
+    plt.xlabel("Number of components")
+    plt.ylabel("MSE")
+    plt.title("Score with varying number of components")
+    plt.show()
+
+    # So for this part, I actually wanted to see that the pls model performed dimension reduction
+    # but is seems like there's still just as many dimensions. I know that the column headings that I
+    # added don't actually correspond to the data shown but we should at least see more 0's.
+
+    # Coefficients currently don't work in PCA.
+    # coefficients = pd.DataFrame(coefficients, columns=X_train.columns)
+    # print(coefficients)
 
 
 def main():
     data = pd.read_csv('owid-covid-data.csv')
-    shift_var = -31
+    shift_var = -1
 
     uk_data = data.drop(data[data['iso_code'] != "GBR"].index)
     uk_data = uk_data.fillna(0)
@@ -126,8 +165,11 @@ def main():
     uk_data = uk_data.drop("continent", axis = 1)
     uk_data = uk_data.drop("location", axis = 1)
 
+    averages = uk_data.mean()
     num_cases = uk_data[['new_cases']].copy()
     uk_data["new_cases"] = uk_data["new_cases"].shift(shift_var)
+
+    #uk_data["new_cases"] = uk_data["new_cases"].fillna()
 
     uk_data['date'] = pd.to_datetime(uk_data['date'])
     uk_data['date'] = uk_data['date'].map(dt.datetime.toordinal)
@@ -138,10 +180,15 @@ def main():
     uk_data['new_cases_smoothed'] = uk_data['new_cases_smoothed'].shift(shift_var)
     uk_data['new_cases_per_million'] = uk_data["new_cases_per_million"].shift(shift_var)
     uk_data['new_cases_smoothed_per_million'] = uk_data["new_cases_smoothed_per_million"].shift(shift_var)
-    uk_data = uk_data.fillna(0)
+
+
+    uk_data = uk_data.fillna(averages)
+    #uk_data = uk_data.fillna(0)
 
     pls_regression(uk_data, num_cases)
     print(uk_data.columns)
+
+    pca(uk_data, num_cases)
 
 if __name__=="__main__":
     main()
