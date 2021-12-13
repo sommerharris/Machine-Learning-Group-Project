@@ -164,7 +164,7 @@ def pca(X,y):
 
 def main():
     data = pd.read_csv('owid-covid-data.csv')
-    shift_var = -30
+    shift_var = -1
 
     uk_data = data.drop(data[data['iso_code'] != "GBR"].index)
     uk_data = uk_data.fillna(0)
@@ -178,16 +178,24 @@ def main():
 
     #uk_data["new_cases"] = uk_data["new_cases"].fillna()
 
-    uk_data['date'] = pd.to_datetime(uk_data['date'])
-    uk_data['date'] = uk_data['date'].map(dt.datetime.toordinal)
+    uk_data['date'] = pd.to_datetime(uk_data['date'] )
 
     uk_data = uk_data.drop("tests_units", axis=1)
 
 #Need to drop columns related to new cases.
-    uk_data['new_cases_smoothed'] = uk_data['new_cases_smoothed'].shift(shift_var)
-    uk_data['new_cases_per_million'] = uk_data["new_cases_per_million"].shift(shift_var)
-    uk_data['new_cases_smoothed_per_million'] = uk_data["new_cases_smoothed_per_million"].shift(shift_var)
+    # uk_data['new_cases_smoothed'] = uk_data['new_cases_smoothed'].shift(shift_var)
+    # uk_data['new_cases_per_million'] = uk_data["new_cases_per_million"].shift(shift_var)
+    # uk_data['new_cases_smoothed_per_million'] = uk_data["new_cases_smoothed_per_million"].shift(shift_var)
+    # uk_data['tests_per_case'] = uk_data["tests_per_case"].shift(shift_var)
 
+#new dropped.
+    uk_data['date'] = uk_data['date'].map(dt.datetime.toordinal)
+    date_var = uk_data['date'].copy()
+    uk_data = uk_data.shift(periods = shift_var)
+
+    uk_data['date'] = date_var
+
+    uk_data = uk_data.set_index(uk_data['date'])
 
     uk_data = uk_data.fillna(averages)
     #uk_data = uk_data.fillna(0)
@@ -217,7 +225,7 @@ def main():
     plt.show()
 
     print(uk_data.columns)
-
+    print(uk_data)
 
 if __name__=="__main__":
     main()
