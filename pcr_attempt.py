@@ -22,7 +22,9 @@ from sklearn.preprocessing import MinMaxScaler
 def pls_regression(X, y):
 
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, train_size=0.8)
+    print(y_train.count())
+    print(y_test.count())
     score = []
     MSE = []
     coefficients = []
@@ -45,21 +47,25 @@ def pls_regression(X, y):
         print(score[i-1])
         print(pls.coef_)
 
-    plt.plot(list(range(1, 40, 1)), score)
-    plt.title("PLS regression")
-    plt.xticks(list(range(0, 41, 2)))
-    plt.xlabel("Number of components")
-    plt.ylabel("Score (R^2)?")
-    plt.title("Score with varying number of components")
-    plt.show()
+    # plt.plot(list(range(1, 40, 1)), score)
+    # plt.title("PLS regression")
+    # plt.xticks(list(range(0, 41, 2)))
+    # plt.xlabel("Number of components")
+    # plt.ylabel("Score (R^2)?")
+    # plt.title("Score with varying number of components")
+    # plt.show()
 
-    plt.plot(list(range(1, 40, 1)), MSE)
-    plt.xticks(list(range(0, 41, 2)))
-    plt.xlabel("Number of components")
-    plt.ylabel("MSE")
-    plt.title("Score with varying number of components")
-    plt.show()
 
+
+    # plt.plot(list(range(1, 40, 1)), MSE)
+    # plt.xticks(list(range(0, 41, 2)))
+    # plt.xlabel("Number of components")
+    # plt.ylabel("MSE")
+    # plt.title("Score with varying number of components")
+    # # plt.show()
+
+
+    return score, MSE
     # So for this part, I actually wanted to see that the pls model performed dimension reduction
     # but is seems like there's still just as many dimensions. I know that the column headings that I
     # added don't actually correspond to the data shown but we should at least see more 0's.
@@ -106,7 +112,7 @@ def l2(X, y):
 
 
 def pca(X,y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, train_size=0.2)
     score = []
     MSE = []
     coefficients = []
@@ -131,20 +137,21 @@ def pca(X,y):
         print(score[i-1])
         # print(pcr.coef_)
 
-    plt.plot(list(range(1, 40, 1)), score)
-    plt.title("PCR regression")
-    plt.xticks(list(range(0, 41, 2)))
-    plt.xlabel("Number of components")
-    plt.ylabel("Score (R^2)?")
-    plt.title("Score with varying number of components")
-    plt.show()
+    # plt.plot(list(range(1, 40, 1)), score)
+    # plt.xticks(list(range(0, 41, 2)))
+    # plt.xlabel("Number of components")
+    # plt.ylabel("Score (R^2)?")
+    # plt.title("Score with varying number of components")
+    # # plt.show()
+    #
+    # plt.plot(list(range(1, 40, 1)), MSE)
+    # plt.xticks(list(range(0, 41, 2)))
+    # plt.xlabel("Number of components")
+    # plt.ylabel("MSE")
+    # plt.title("Score with varying number of components")
+    # plt.show()
 
-    plt.plot(list(range(1, 40, 1)), MSE)
-    plt.xticks(list(range(0, 41, 2)))
-    plt.xlabel("Number of components")
-    plt.ylabel("MSE")
-    plt.title("Score with varying number of components")
-    plt.show()
+    return score, MSE
 
     # So for this part, I actually wanted to see that the pls model performed dimension reduction
     # but is seems like there's still just as many dimensions. I know that the column headings that I
@@ -157,7 +164,7 @@ def pca(X,y):
 
 def main():
     data = pd.read_csv('owid-covid-data.csv')
-    shift_var = -1
+    shift_var = -30
 
     uk_data = data.drop(data[data['iso_code'] != "GBR"].index)
     uk_data = uk_data.fillna(0)
@@ -185,10 +192,32 @@ def main():
     uk_data = uk_data.fillna(averages)
     #uk_data = uk_data.fillna(0)
 
-    pls_regression(uk_data, num_cases)
+    pls_score, pls_RMSE = pls_regression(uk_data, num_cases)
+    pcr_score, pcr_RMSE = pca(uk_data, num_cases)
+
+    plt.plot(list(range(1, 40, 1)), pls_score, label = "PLS Score")
+    plt.plot(list(range(1, 40, 1)), pcr_score, label = "PCR Score")
+
+    # plt.xticks(list(range(0, 41, 2)))
+    plt.xlabel("Number of components")
+    plt.ylabel("Score (R^2)")
+    plt.title("R-squared when predicting 30 days ahead")
+    plt.legend()
+    plt.show()
+
+
+    plt.plot(list(range(1, 40, 1)), pls_RMSE, label = "PLS Score")
+    plt.plot(list(range(1, 40, 1)), pcr_RMSE, label = "PCR Score")
+
+    # plt.xticks(list(range(0, 41, 2)))
+    plt.xlabel("Number of components")
+    plt.ylabel("Root mean square error")
+    plt.title("RMSE when predicting 30 days ahead")
+    plt.legend()
+    plt.show()
+
     print(uk_data.columns)
 
-    pca(uk_data, num_cases)
 
 if __name__=="__main__":
     main()
