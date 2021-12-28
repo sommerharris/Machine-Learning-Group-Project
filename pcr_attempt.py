@@ -1,3 +1,4 @@
+import math
 
 import pandas as pd
 import numpy as np
@@ -22,7 +23,7 @@ from sklearn.preprocessing import MinMaxScaler
 def pls_regression(X, y):
 
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, train_size=0.8)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 0, train_size=0.8)
     print(y_train.count())
     print(y_test.count())
     score = []
@@ -92,12 +93,17 @@ def pls_cross_val(X, y):
 
     mse = []
 
-    for i in np.arange(1, 20):
+    for i in np.arange(1, 40):
         pls = PLSRegression(n_components=i)
-        score = model_selection.cross_val_score(pls, X, y, cv=kf_10
+        score = model_selection.cross_val_score(pls, X, y, cv=kf_10, scoring= 'neg_mean_squared_error'
                                                 ).mean()
-        mse.append(-score)
+        score = score * -1
+        score = math.sqrt(score)
+        mse.append(score)
+
     print(mse)
+    return mse
+
 
 
 def l2(X, y):
@@ -161,6 +167,26 @@ def pca(X,y):
     # coefficients = pd.DataFrame(coefficients, columns=X_train.columns)
     # print(coefficients)
 
+def pcr_cross_val(X, y):
+    n = len(X)
+
+    # 10-fold CV, with shuffle
+    kf_10 = model_selection.KFold(n_splits=10, shuffle=True, random_state=1)
+
+    mse = []
+
+    for i in np.arange(1, 40):
+        pcr = make_pipeline(StandardScaler(), PCA(n_components=i), Ridge())
+
+        score = model_selection.cross_val_score(pcr, X, y, cv=kf_10, scoring= 'r2'
+                                                ).mean()
+        # score = score * -1
+        # score = math.sqrt(score)
+        mse.append(score)
+
+
+    print(mse)
+    return mse
 
 def main():
     data = pd.read_csv('owid-covid-data.csv')
@@ -209,7 +235,7 @@ def main():
     # plt.xticks(list(range(0, 41, 2)))
     plt.xlabel("Number of components")
     plt.ylabel("Score (R^2)")
-    plt.title("R-squared when predicting 30 days ahead")
+    plt.title("R-squared when predicting 1 day ahead")
     plt.legend()
     plt.show()
 
@@ -220,12 +246,12 @@ def main():
     # plt.xticks(list(range(0, 41, 2)))
     plt.xlabel("Number of components")
     plt.ylabel("Root mean square error")
-    plt.title("RMSE when predicting 30 days ahead")
+    plt.title("RMSE when predicting 1 day ahead")
     plt.legend()
     plt.show()
 
     print(uk_data.columns)
-    print(uk_data)
+
 
 if __name__=="__main__":
     main()
